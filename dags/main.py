@@ -2,6 +2,7 @@ from airflow import DAG
 import pendulum
 from datetime import datetime, timedelta
 from api.video_stats import get_playlist_id, get_videos_ids, extract_video_data, save_to_json
+from DWH.dwh import staging_table, core_table
 
 local_tz = pendulum.timezone("Europe/Athens")
 
@@ -40,3 +41,22 @@ with DAG(
 
     #defining the task dependencies
     playlist_id >> video_ids >> extracted_data >> save_to_json_task
+
+
+
+with DAG(
+    dag_id='update_db',
+    default_args=default_args,
+    description='A DAG to process JSon data and update DWH both schemas',
+    schedule='0 15 * * *',  # Daily at 15:00 Athens time
+    catchup=False,
+) as dag:
+    
+    #defining the tasks
+
+    update_staging = staging_table()
+    update_core = core_table()
+    
+
+    #defining the task dependencies
+    update_staging >> update_core

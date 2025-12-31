@@ -1,10 +1,10 @@
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from pyscopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor
 
-table = 'yt-api'
+table = 'yt_api'
 
 def get_conn_cursor():
-    hook = PostgresHook(postgres_conn_id='AIRFLOW_CONN_POSTGRES_DB_YT_ELT', atabase='elt_db')
+    hook = PostgresHook(postgres_conn_id='postgres_db_yt_elt', database='elt_db')
     conn = hook.get_conn()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     return conn, cur
@@ -14,7 +14,7 @@ def close_conn_cursor(conn, cur):
     conn.close()
 
 
-def create_schema():
+def create_schema(schema):
     conn, cur = get_conn_cursor()
 
     schema_sql= f"CREATE SCHEMA IF NOT EXISTS {schema};"
@@ -37,7 +37,7 @@ def create_table(schema):
             "comment_count" INT
         );
         """
-    else
+    else:
         table_sql= f"""
         CREATE TABLE IF NOT EXISTS {schema}.{table} (
             "video_id" VARCHAR(11) PRIMARY KEY NOT NULL,

@@ -18,11 +18,24 @@ def insert_rows(cur,conn,schema,row):
         else:
             video_id= 'video_id'
 
-            cur.execute(f"""
-            INSERT INTO {schema}.{table} (video_id, video_title, upload_date, duration, video_type, video_views, video_likes, comment_count)
-            VALUES (%(video_id)s, %(title)s, %(publishedAt)s, %(duration)s, %(video_type)s, %(viewCount)s, %(likeCount)s, %(commentCount)s)
-            """,row)
-        
+            cur.execute(
+                f"""
+                INSERT INTO {schema}.{table}
+                (video_id, video_title, upload_date, duration, video_type, video_views, video_likes, comment_count)
+                VALUES (
+                    %(video_id)s,
+                    %(video_title)s,
+                    %(upload_date)s,
+                    %(duration)s,
+                    %(video_type)s,
+                    %(video_views)s,
+                    %(video_likes)s,
+                    %(comment_count)s
+                );
+                """,
+                row
+            )
+
         conn.commit()
 
         logger.info(f"Inserted video_id {row[video_id]} into {schema}.{table}")
@@ -58,10 +71,10 @@ def update_rows(cur,conn,schema,row):
             cur.execute(
                 f"""
                 UPDATE {schema}.{table}
-                SET "video_title"=%({video_title})s,
-                    "video_views"=%({video_views})s,
-                    "video_likes"=%({video_likes})s,
-                    "comment_count"=%({comment_count})s
+                SET "video_title" = %({video_title})s,
+                    "video_views" = %({video_views})s,
+                    "video_likes"= %({video_likes})s,
+                    "comment_count"= %({comment_count})s
                 WHERE "video_id"=%({video_id})s AND "upload_date"=%({upload_date})s;
                 """,row)
         
