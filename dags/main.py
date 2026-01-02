@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from api.video_stats import get_playlist_id, get_videos_ids, extract_video_data, save_to_json
 from DWH.dwh import staging_table, core_table
 from dataquality.soda import yt_elt_data_quality
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 local_tz = pendulum.timezone("Europe/Athens")
 
@@ -31,7 +33,7 @@ with DAG(
     description='A DAG to extract YouTube video stats and save to JSON',
     schedule='0 14 * * *',  # Daily at 14:00 Athens time
     catchup=False,
-) as dag:
+) as dag_produce:
     
     #defining the tasks
 
@@ -43,36 +45,48 @@ with DAG(
 
     save_to_json_task=save_to_json(extracted_data)
 
-    #defining the task dependencies
-    playlist_id >> video_ids >> extracted_data >> save_to_json_task
 
+    trigger_update_db = TriggerDagRunOperator(
+        task_id="trigger_update_db",
+        trigger_dag_id= "update_db"
+    )
+
+
+    #defining the task dependencies
+    playlist_id >> video_ids >> extracted_data >> save_to_json_task >> trigger_update_db
 
 
 with DAG(
     dag_id='update_db',
     default_args=default_args,
     description='A DAG to process JSon data and update DWH both schemas',
-    schedule='0 15 * * *',  # Daily at 15:00 Athens time
+    schedule=None,
     catchup=False,
-) as dag:
+) as dag_update:
     
     #defining the tasks
 
     update_staging = staging_table()
     update_core = core_table()
+
+    trigger_data_quality = TriggerDagRunOperator(
+        task_id="trigger_data_quality",
+        trigger_dag_id= "data_quality"
+    )
+    
     
 
     #defining the task dependencies
-    update_staging >> update_core
+    update_staging >> update_core>>trigger_data_quality
 
 
 with DAG(
     dag_id='data_quality',
     default_args=default_args,
     description='A DAG to check the data quality of DWH both schemas',
-    schedule='0 16 * * *',  # Daily at 16:00 Athens time
+    schedule=None,
     catchup=False,
-) as dag:
+) as dag_quality:
     
     #defining the tasks
 
