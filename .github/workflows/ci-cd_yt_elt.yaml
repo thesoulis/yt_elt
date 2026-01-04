@@ -101,7 +101,7 @@ jobs:
             run: |
               DAG_NAMES=("produdce_json" "data_quality" "update_db")
               for DAG in "${DAG_NAMES[@]}" ; do
-                docker exec -t airflow-worker sh -c "airflow dag test $DAG"
+                docker exec -t airflow-worker sh -c "airflow dags test $DAG"
               done
           
           - name: Tear down Docker Compose
