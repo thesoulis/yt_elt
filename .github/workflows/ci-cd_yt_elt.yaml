@@ -99,7 +99,7 @@ jobs:
           - name: Run e2e DAG tests
             if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
             run: |
-              DAG_NAMES=("produdce_json" "data_quality" "update_db")
+              DAG_NAMES=("produdce_json"  "update_db" "data_quality")
               for DAG in "${DAG_NAMES[@]}" ; do
                 docker exec -t airflow-worker sh -c "airflow dags test $DAG"
               done
