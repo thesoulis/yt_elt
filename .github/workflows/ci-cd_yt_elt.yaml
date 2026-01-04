@@ -39,10 +39,9 @@ jobs:
             if: steps.changed-files-build.outputs.any_changed == 'true'
             run: |
                     docker buildx build --push \
-                        --tag ${{ vars.DOCKERHUB_NAMESPACE }}/ ${{ vars.DOCKERHUB_REPOSITORY }}:latest \
-                        --tag ${{ vars.DOCKERHUB_NAMESPACE }}/ ${{ vars.DOCKERHUB_REPOSITORY }}:${{github.sha}} \
-                        .
-
+                      --tag ${{ vars.DOCKERHUB_NAMESPACE }}/ ${{ vars.DOCKERHUB_REPOSITORY }}:latest \
+                      --tag ${{ vars.DOCKERHUB_NAMESPACE }}/ ${{ vars.DOCKERHUB_REPOSITORY }}:${{github.sha}} \
+                      .
     
     unit-and-integration-and-e2e-tests:
       runs-on: ubuntu-latest
